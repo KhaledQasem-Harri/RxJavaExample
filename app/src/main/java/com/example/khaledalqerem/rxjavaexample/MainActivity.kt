@@ -81,8 +81,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun prepareNotes(): List<Note> {
+        val notes = ArrayList<Note>()
+        notes.add(Note(1, "buy tooth paste!"))
+        notes.add(Note(2, "call brother!"))
+        notes.add(Note(3, "watch narcos tonight!"))
+        notes.add(Note(4, "pay power bill!"))
+
+        return notes
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         compositeDisposable.dispose()
     }
 }
+
+class Note(var id: Int, var note: String)
