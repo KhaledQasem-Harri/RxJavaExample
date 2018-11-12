@@ -16,38 +16,24 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val animalObservable = getAnimalsObservable()
-        val animalObserver = getAnimalObserver()
-        val animalCapObserver = getAnimalCapsObserver()
+        val disposableObserver = getObserver()
 
-        animalObservable.subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .filter { it.toLowerCase().startsWith("c") }
-            .map { it.toUpperCase() }
-            .subscribe(animalCapObserver)
-
-        animalObservable.subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .filter { it.toLowerCase().startsWith("b") }
-            .subscribe(animalObserver)
+        val observable =
+//            Observable.just(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+            Observable.range(1, 20)
+//                .repeat(4)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .filter { it % 2 == 0 }
+                .map { "$it is even number" }
+                .subscribeWith(disposableObserver)
 
 
-
-        compositeDisposable.add(animalObserver)
-        compositeDisposable.add(animalCapObserver)
+        compositeDisposable.add(observable)
     }
 
-    private fun getAnimalsObservable(): Observable<String> {
-        return Observable.fromArray(
-            "Ant", "Ape",
-            "Bat", "Bee", "Bear", "Butterfly",
-            "Cat", "Crab", "Cod",
-            "Dog", "Dove",
-            "Fox", "Frog"
-        )
-    }
 
-    private fun getAnimalObserver(): DisposableObserver<String> {
+    private fun getObserver(): DisposableObserver<String> {
         return object : DisposableObserver<String>() {
             override fun onComplete() {
                 Log.d("MainActivity", "onComplete === All items are emitted")
