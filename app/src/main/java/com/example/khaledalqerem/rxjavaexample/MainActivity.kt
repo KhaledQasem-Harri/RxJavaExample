@@ -3,6 +3,7 @@ package com.example.khaledalqerem.rxjavaexample
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import androidx.work.*
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.ObservableOnSubscribe
@@ -10,6 +11,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableObserver
 import io.reactivex.schedulers.Schedulers
+import java.util.concurrent.TimeUnit
+
+private const val TEAM_UPDATE_TASK_ID = "team_members_update"
 
 class MainActivity : AppCompatActivity() {
 
@@ -17,14 +21,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        val disposableObserver = getObserver()
-        val notes = prepareNotes()
-        val observable =
-            Observable.create<Note> { emitter -> notes.forEach { emitter.onNext(it) } }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(disposableObserver)
+        enqueueTeamMembersWorker()
+//        val disposableObserver = getObserver()
+//        val notes = prepareNotes()
+//        val observable =
+//            Observable.create<Note> { emitter -> notes.forEach { emitter.onNext(it) } }
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribeWith(disposableObserver)
 //        val observable =
 //            Observable.just(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 //            Observable.range(1, 20)
@@ -36,7 +40,7 @@ class MainActivity : AppCompatActivity() {
 //                .subscribeWith(disposableObserver)
 
 
-        compositeDisposable.add(observable)
+//        compositeDisposable.add(observable)
     }
 
 
@@ -89,6 +93,24 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         compositeDisposable.dispose()
     }
+
+    private fun enqueueTeamMembersWorker() {
+//        val constraints: Constraints = Constraints.Builder()
+//            .setRequiredNetworkType(NetworkType.CONNECTED)
+//            .build()
+        val teamMembersWork =
+//            OneTimeWorkRequest.Builder(TeamMembersWorker::class.java).build()
+            PeriodicWorkRequest.Builder(TeamMembersWorker::class.java, 16, TimeUnit.MINUTES).build()
+//                .setConstraints(constraints).addTag("teamWorker").build()
+        WorkManager.getInstance().enqueue(teamMembersWork)
+//            .enqueueUniquePeriodicWork(
+//                TEAM_UPDATE_TASK_ID,
+//                ExistingPeriodicWorkPolicy.KEEP,
+//                teamMembersWork
+//            )
+
+    }
+
 }
 
 class Note(var id: Int, var note: String)
